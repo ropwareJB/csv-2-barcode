@@ -1,20 +1,77 @@
-# Barcode Generator Tool
+# CSV-2-barcode -> Barcode Generator Tool
 # Josh Brown, 2014 EPIDEV
 #
-# Python 3.4 
+# Dependencies:
+#       - Python 2.7
+#       - Python Imaging Library    http://www.pythonware.com/products/pil/
+#       - PyPDF                     https://code.google.com/p/pyfpdf/
+#
 
 from fpdf import FPDF
 import csv
+import sys
+
+# Default values - can be overridden using cmd switches
 INPUT_FILE = "data.csv"
-FONT = 'Montserrat'
+OUTPUT_FILE = "out.pdf"
+FONT = 'Helvetica'
+
+FONT_SRC = ''
+FONT_SRC_BOLD = ''
+
+# python genBarcodes.py -o output.pdf -f Helvatica
+if len(sys.argv) > 1:
+    print sys.argv
+    args = sys.argv[1]
+    for x in range(len(args[:-1])):
+        if args[x] == '-o':
+            OUTPUT_FILE = args[x+1]
+        elif args[x] == '-f' :
+            FONT = args[x+1]
+        elif args[x] == '--font-src':
+            FONT_SRC = args[x+1]
+        elif args[x] == '--font-bold-src':
+            FONT_SRC_BOLD = args[x+1]
+
+if FONT_SRC != '' && FONT_SRC_BOLD == '': FONT_SRC_BOLD = FONT_SRC
+
+# Font sizes for the respective data segments
 COLLECTION_SIZE = 38
 SKU_SIZE = 38
 PRODUCT_SIZE = 18
 BARCODE_SIZE = 8
-
 SUBTXT_SIZE = 8
 REG_SIZE = 17
 
+# X,Y posiitons of the origin and barcode
+# The base padding applied to all elements
+# Barcode dimensions, (x, y) position relative to BASE
+# Further padding for text items
+BASE_Y=3
+BASE_X=3
+BARCODE_X=BASE_X+15
+BARCODE_Y=BASE_Y
+BARCODE_H=3
+PADDING_X = 0
+PADDING_Y = 0
+
+# y-levels for the inline-text segments
+y_1= BASE_Y+1.5
+y_2= y_1+2
+y_3= y_2+1.25
+y_4= y_3+2.5
+y_5= y_4+0.85
+y_6= y_5+1.2
+y_7= y_6+0.85
+
+# x-levels for the inline-text segments
+x_1=0
+x_2=11
+x_3=18
+
+# Product Model Class
+# Just a simple wrapper for each product for superior code readability
+# Doesn't do any function other than extraction from the CSV array
 class Product:
     def __init__(self, data):
         self.sku = data[0]
@@ -31,6 +88,8 @@ class Product:
         self.destination = data[11]
         self.origin = data[12]
 
+# Extraction of all the data and paring it into
+#                       a list of Product instances.
 columns = False
 rows = []
 with open(INPUT_FILE, 'rU') as f:
@@ -41,41 +100,22 @@ with open(INPUT_FILE, 'rU') as f:
             continue
         rows.append(Product(row))
 
-BASE_Y=3
-BASE_X=3
-
-BARCODE_X=BASE_X+15
-BARCODE_Y=BASE_Y
-BARCODE_H=3
-
-PADDING_X = 0
-PADDING_Y = 0
-
-y_1= BASE_Y+1.5
-y_2= y_1+2
-y_3= y_2+1.25
-y_4= y_3+2.5
-y_5= y_4+0.85
-y_6= y_5+1.2
-y_7= y_6+0.85
-
-x_1=0
-x_2=11
-x_3=18
-
-cProduct = rows[0]
-
+# Begin the PDF production, Letter page
 pdf = FPDF('L', unit='cm', format='Letter')
 pdf.set_margins(PADDING_X, PADDING_Y)
 
-pdf.add_font(FONT, '', fname='Montserrat-Light.ttf', uni=True)
-pdf.add_font(FONT, 'B', fname='Montserrat-Regular.ttf', uni=True)
+# Set the fonts that we would like to use, and override the Bold
+# option for the font.
+if FONT_SRC != '' && FONT_SRC_BOLD != '':
+    pdf.add_font(FONT, '', fname=FONT_SRC, uni=True)
+    pdf.add_font(FONT, 'B', fname=FONT_SRC_BOLD, uni=True)
 
+# For each product, add a page and on that page, 
+# scrape a bracode from barcode.tec-it.com and insert it,
+# then write the Collection, SKU and other product details
 for cProduct in rows:
     pdf.add_page()
-
     img = "http://barcode.tec-it.com/barcode.ashx?code=Code128&modulewidth=fit&data="+cProduct.sku+"&dpi=96&imagetype=png&rotation=0&color=&bgcolor=&fontcolor=&quiet=0&qunit=mm"
-
     pdf.image(img, x=BARCODE_X, y=BARCODE_Y, type='png', link='', h=BARCODE_H)
     pdf.set_font(FONT,'', COLLECTION_SIZE)
     pdf.set_fill_color(255)
@@ -123,4 +163,4 @@ for cProduct in rows:
     pdf.set_font(FONT,'', SUBTXT_SIZE)
     pdf.text(BASE_X+x_3+2.2, y_7+0.65, cProduct.origin);
 
-pdf.output('out.pdf','F')
+pdf.output(OUTPUT_FILE, 'F')
