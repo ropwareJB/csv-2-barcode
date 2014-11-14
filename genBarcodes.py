@@ -22,7 +22,6 @@ FONT_SRC_BOLD = ''
 # python genBarcodes.py -o output.pdf -f Helvatica
 # python genBarcodes.py -i input.csv --font-src font_reg.ttf --font-bold-src font_bold.ttf
 if len(sys.argv) > 1:
-    print sys.argv
     args = sys.argv[1]
     for x in range(len(args[:-1])):
         if args[x] == '-o':
@@ -36,7 +35,7 @@ if len(sys.argv) > 1:
         elif args[x] == '--font-bold-src':
             FONT_SRC_BOLD = args[x+1]
 
-if FONT_SRC != '' && FONT_SRC_BOLD == '': FONT_SRC_BOLD = FONT_SRC
+if FONT_SRC != '' and FONT_SRC_BOLD == '': FONT_SRC_BOLD = FONT_SRC
 
 # Font sizes for the respective data segments
 COLLECTION_SIZE = 38
@@ -109,7 +108,7 @@ pdf.set_margins(PADDING_X, PADDING_Y)
 
 # Set the fonts that we would like to use, and override the Bold
 # option for the font.
-if FONT_SRC != '' && FONT_SRC_BOLD != '':
+if FONT_SRC != '' and FONT_SRC_BOLD != '':
     pdf.add_font(FONT, '', fname=FONT_SRC, uni=True)
     pdf.add_font(FONT, 'B', fname=FONT_SRC_BOLD, uni=True)
 
