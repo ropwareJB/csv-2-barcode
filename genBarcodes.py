@@ -6,7 +6,7 @@
 from fpdf import FPDF
 import csv
 INPUT_FILE = "data.csv"
-FONT = 'Helvetica'
+FONT = 'Montserrat'
 COLLECTION_SIZE = 38
 SKU_SIZE = 38
 PRODUCT_SIZE = 18
@@ -14,8 +14,6 @@ BARCODE_SIZE = 8
 
 SUBTXT_SIZE = 8
 REG_SIZE = 17
-
-
 
 class Product:
     def __init__(self, data):
@@ -67,13 +65,15 @@ x_3=18
 
 cProduct = rows[0]
 
-pdf = FPDF('L', unit='cm')
+pdf = FPDF('L', unit='cm', format='Letter')
 pdf.set_margins(PADDING_X, PADDING_Y)
+
+pdf.add_font(FONT, '', fname='Montserrat-Light.ttf', uni=True)
+pdf.add_font(FONT, 'B', fname='Montserrat-Regular.ttf', uni=True)
 
 for cProduct in rows:
     pdf.add_page()
-#pdf.add_font('DejaVu', '', fname='reqs/Brandon_thin.otf')
-#pdf.add_font('Brandon Grotesque', '', fname='Brandon_reg.otf')
+
     img = "http://barcode.tec-it.com/barcode.ashx?code=Code128&modulewidth=fit&data="+cProduct.sku+"&dpi=96&imagetype=png&rotation=0&color=&bgcolor=&fontcolor=&quiet=0&qunit=mm"
 
     pdf.image(img, x=BARCODE_X, y=BARCODE_Y, type='png', link='', h=BARCODE_H)
@@ -83,7 +83,7 @@ for cProduct in rows:
     pdf.cell(0, 2, fill=1)
 
     pdf.set_font(FONT,'B', COLLECTION_SIZE)
-    pdf.text(BASE_X, y_1, cProduct.collection);
+    pdf.text(BASE_X, y_1, cProduct.collection.upper());
 
     pdf.set_font(FONT,'', SKU_SIZE)
     pdf.text(BASE_X, y_2, cProduct.sku);
@@ -100,7 +100,7 @@ for cProduct in rows:
     tw = pdf.get_string_width(txt)
     pdf.text(BASE_X+x_2-tw/2, y_4, txt);
     pdf.text(BASE_X+x_3, y_4, "PO NO.");
-    pdf.set_font(FONT,'U', REG_SIZE)
+    pdf.set_font(FONT, 'U', REG_SIZE)
     pdf.text(BASE_X+x_1, y_5, "%sL x %sW x %sH cm" % (cProduct.length, cProduct.width, cProduct.height));
     txt=cProduct.parcelNo
     tw = pdf.get_string_width(txt)
@@ -113,7 +113,7 @@ for cProduct in rows:
     tw = pdf.get_string_width(txt)
     pdf.text(BASE_X+x_2-tw/2, y_6, txt);
     pdf.text(BASE_X+x_3, y_6, "DESTINATION");
-    pdf.set_font(FONT,'U', REG_SIZE)
+    pdf.set_font(FONT, 'U', REG_SIZE)
     pdf.text(BASE_X+x_1, y_7, "%s kg"%cProduct.weight);
     txt=cProduct.parcelPcs
     tw = pdf.get_string_width(txt)

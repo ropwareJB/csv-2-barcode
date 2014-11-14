@@ -1,3 +1,7 @@
 reqs/*
 data.csv*
 *.otf
+*.pkl
+*.pdf
+*.ttf
+*.swp
