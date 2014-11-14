@@ -1,7 +1,7 @@
 # CSV-2-barcode 
 A Python Barcode Generator
 
-Generates a PDF with a series of barcode tags 
+Generates a PDF with a series of barcode tags and relevant details on a product, one per page. A sample CSV is provided, to illustrate the fields that the script expects. 
 
 ## Disclaimer
 This software uses TEC-IT's barcode generator (http://barcode.tec-it.com/)
