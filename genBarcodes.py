@@ -20,12 +20,15 @@ FONT_SRC = ''
 FONT_SRC_BOLD = ''
 
 # python genBarcodes.py -o output.pdf -f Helvatica
+# python genBarcodes.py -i input.csv --font-src font_reg.ttf --font-bold-src font_bold.ttf
 if len(sys.argv) > 1:
     print sys.argv
     args = sys.argv[1]
     for x in range(len(args[:-1])):
         if args[x] == '-o':
             OUTPUT_FILE = args[x+1]
+        elif args[x] == '-i':
+            INPUT_FILE = args[x+1]
         elif args[x] == '-f' :
             FONT = args[x+1]
         elif args[x] == '--font-src':

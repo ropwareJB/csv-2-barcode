@@ -1,10 +1,12 @@
 # CSV-2-barcode 
 A Python Barcode Generator
 
+Generates a PDF with a series of barcode tags 
+
 ## Disclaimer
 This software uses TEC-IT's barcode generator (http://barcode.tec-it.com/)
-You need to purchase a license to use this software, or modify this software such
-that it does not use this tool.
+You must purchase a license to use this software, or modify this software such
+that it does not use TEC-IT's tool.
 
 ## Dependencies
 1. Python2.7
@@ -14,5 +16,10 @@ that it does not use this tool.
 
 3. PyPDF                  - https://github.com/reingart/pyfpdf
 
-
+## Usage
+```
+python genBarcodes.py -i input.csv -o barcodes.pdf
+python genBarcodes.py -i input.csv -o barcodes.pdf -f Ariel
+python genBarcodes.py --font-src font_reg.ttf
+```
 
