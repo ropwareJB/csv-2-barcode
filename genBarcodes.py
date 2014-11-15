@@ -115,7 +115,10 @@ if FONT_SRC != '' and FONT_SRC_BOLD != '':
 # For each product, add a page and on that page, 
 # scrape a bracode from barcode.tec-it.com and insert it,
 # then write the Collection, SKU and other product details
+n=0
+maxN = len(rows)
 for cProduct in rows:
+    n=n+1
     pdf.add_page()
     img = "http://barcode.tec-it.com/barcode.ashx?code=Code128&modulewidth=fit&data="+cProduct.sku+"&dpi=96&imagetype=png&rotation=0&color=&bgcolor=&fontcolor=&quiet=0&qunit=mm"
     pdf.image(img, x=BARCODE_X, y=BARCODE_Y, type='png', link='', h=BARCODE_H)
@@ -164,5 +167,6 @@ for cProduct in rows:
 
     pdf.set_font(FONT,'', SUBTXT_SIZE)
     pdf.text(BASE_X+x_3+2.2, y_7+0.65, cProduct.origin);
-
+    print "[ %3d / %-3d  ] %3.2f%%" % (n, maxN, n/float(maxN)*100)
 pdf.output(OUTPUT_FILE, 'F')
+print "Complete.\n"
