@@ -146,7 +146,7 @@ for cProduct in rows:
     pdf.text(BASE_X+x_2-tw/2, y_4, txt);
     pdf.text(BASE_X+x_3, y_4, "PO NO.");
     pdf.set_font(FONT, 'U', REG_SIZE)
-    pdf.text(BASE_X+x_1, y_5, "%sL x %sW x %sH cm" % (cProduct.length, cProduct.width, cProduct.height));
+    pdf.text(BASE_X+x_1, y_5, "%s L x %s W x %s H cm" % (cProduct.length, cProduct.width, cProduct.height));
     txt=cProduct.parcelNo
     tw = pdf.get_string_width(txt)
     pdf.text(BASE_X+x_2-tw/2, y_5, txt);
@@ -163,10 +163,15 @@ for cProduct in rows:
     txt=cProduct.parcelPcs
     tw = pdf.get_string_width(txt)
     pdf.text(BASE_X+x_2-tw/2, y_7, txt);
-    pdf.text(BASE_X+x_3, y_7, cProduct.destination);
+    txt = cProduct.destination
+    pdf.text(BASE_X+x_3, y_7, txt);
+
+    tw = pdf.get_string_width(txt)
 
     pdf.set_font(FONT,'', SUBTXT_SIZE)
-    pdf.text(BASE_X+x_3+2.2, y_7+0.65, cProduct.origin);
+    txt=cProduct.origin
+    twx = pdf.get_string_width(txt)
+    pdf.text(BASE_X+x_3+tw-twx, y_7+0.65, txt);
     print "[ %3d / %-3d  ] %3.2f%%" % (n, maxN, n/float(maxN)*100)
 pdf.output(OUTPUT_FILE, 'F')
 print "Complete.\n"
