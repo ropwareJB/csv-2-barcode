@@ -1,5 +1,5 @@
 reqs/*
-data.csv*
+data.csv
 *.otf
 *.pkl
 *.pdf
