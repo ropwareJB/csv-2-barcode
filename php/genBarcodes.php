@@ -6,7 +6,7 @@
   //       - fPDF    https://http://f$pdf->org/
   //
 
-require('f$pdf->php');
+require('fpdf.php');
 
 import csv
 import sys
@@ -21,14 +21,15 @@ $FONT_SRC_BOLD = '';
 
 # php genBarcodes.php -o output.$pdf -f Helvatica
 # php genBarcodes.php -i input.csv --font-src font_reg.ttf --font-bold-src font_bold.ttf
-if(len(sys.argv) > 1){
-    args = sys.argv[1:]
-    for x in range(len(args[:-1])){
-        if(args[x] == '-o') $OUTPUT_FILE = args[x+1];
-        else if(args[x] == '-i') $INPUT_FILE = args[x+1];
-        else if(args[x] == '-f') $FONT = args[x+1];
-        else if(args[x] == '--font-src') $FONT_SRC = args[x+1];
-        else if(args[x] == '--font-bold-src') $FONT_SRC_BOLD = args[x+1];
+if(count(sys.argv) > 1){
+    $args = sys.argv[1:]
+    $argRange = range(count($args[:-1]));
+    foreach($argRange as $x){
+        if($args[x] == '-o') $OUTPUT_FILE = $args[$x+1];
+        else if($args[$x] == '-i') $INPUT_FILE = $args[$x+1];
+        else if($args[$x] == '-f') $FONT = $args[$x+1];
+        else if($args[$x] == '--font-src') $FONT_SRC = $args[$x+1];
+        else if($args[$x] == '--font-bold-src') $FONT_SRC_BOLD = $args[$x+1];
     }
 }
 if($FONT_SRC != '' && $FONT_SRC_BOLD == '') $FONT_SRC_BOLD = $FONT_SRC;
@@ -72,6 +73,19 @@ $x_3=18;
 # Just a simple wrapper for each product for superior code readability
 # Doesn't do any function other than extraction from the CSV array
 class Product{
+    public sku;
+    public collection;
+    public product;
+    public colour;
+    public length;
+    public width;
+    public height;
+    public weight;
+    public parcelNo;
+    public parcelPcs;
+    public poNo;
+    public destination;
+    public origin;
     function Product($data){
         $this->sku = $data[0];
         $this->collection = $data[1];
@@ -93,89 +107,95 @@ class Product{
 #                       a list of Product instances.
 $columns = False;
 $rows = array();
-with open(INPUT_FILE, 'rU') as f{
-    $reader = csv.reader(f);
-    foreach($reader as $row){
-        if($columns == False){ 
-            $columns = row;
-            continue;
-        }
-        $rows.append(new Product($row));
+
+$sourceFile = open($INPUT_FILE, 'rU') as f;
+$reader = csv.reader($sourceFile);
+foreach($reader as $row){
+    if($columns == False){ 
+        $columns = $row;
+        continue;
     }
+    $rows.append(new Product($row));
 }
 
+$csv = array_map('str_getcsv', file('data.csv'));
+
 # Begin the PDF production, Letter page
-$pdf = FPDF('L', unit='cm', format='Letter');
-$pdf->set_margins($PADDING_X, $PADDING_Y);
+$pdf = FPDF('L', 'cm', 'Letter');
+$pdf->SetMargins($PADDING_X, $PADDING_Y);
 
 # Set the fonts that we would like to use, and override the Bold
 # option for the font.
 if($FONT_SRC != '' && $FONT_SRC_BOLD != ''){
-    $pdf->add_font(FONT, '', fname=FONT_SRC, uni=True);
-    $pdf->add_font(FONT, 'B', fname=FONT_SRC_BOLD, uni=True);
+    $pdf->AddFont($FONT, '', $FONT_SRC);
+    $pdf->AddFont($FONT, 'B', $FONT_SRC_BOLD);
 }
 
 # For each product, add a page and on that page, 
 # scrape a bracode from barcode.tec-it.com and insert it,
 # then write the Collection, SKU and other product details
 $n=0;
-$maxN = len(rows);
+$maxN = count($rows);
 foreach($rows as $cProduct){
-    $n=$n+1;
-    $pdf->add_page();
-    img = "http://barcode.tec-it.com/barcode.ashx?code=Code128&modulewidth=fit&data="+cProduct.sku+"&dpi=96&imagetype=png&rotation=0&color=&bgcolor=&fontcolor=&quiet=0&qunit=mm";
-    $pdf->image(img, x=$BARCODE_X, y=$BARCODE_Y, type='png', link='', h=$BARCODE_H);
-    $pdf->set_font(FONT,'', $COLLECTION_SIZE);
-    $pdf->set_fill_color(255);
-    $pdf->set_xy($BARCODE_X, $BARCODE_Y+$BARCODE_H-1*$BARCODE_H/3.0);
-    $pdf->cell(0, 2, fill=1);
+    $n++;
+    $pdf->AddPage();
+    $imgURL = "http://barcode.tec-it.com/barcode.ashx?code=Code128&modulewidth=fit&data=".$cProduct->sku."&dpi=96&imagetype=png&rotation=0&color=&bgcolor=&fontcolor=&quiet=0&qunit=mm";
+    $pdf->Image($imgURL, $BARCODE_X, $BARCODE_Y, 0, $BARCODE_H, 'png');
+    $pdf->SetFont($FONT,'', $COLLECTION_SIZE);
+    $pdf->SetFillColor(255);
+    $pdf->SetXY($BARCODE_X, $BARCODE_Y+$BARCODE_H-1*$BARCODE_H/3.0);
+    $pdf->Cell(0, 2, fill=1);
 
-    $pdf->set_font(FONT,'B', $COLLECTION_SIZE);
-    $pdf->text($BASE_X, $y_1, cProduct.collection.upper());
+    $pdf->SetFont($FONT,'B', $COLLECTION_SIZE);
+    $pdf->Text($BASE_X, $y_1, strtoupper($cProduct->collection));
 
-    $pdf->set_font(FONT,'', $SKU_SIZE);
-    $pdf->text($BASE_X, $y_2, cProduct.sku);
+    $pdf->SetFont($FONT,'', $SKU_SIZE);
+    $pdf->Text($BASE_X, $y_2, $cProduct->sku);
 
-    $pdf->set_font(FONT,'', PRODUCT_SIZE);
-    $pdf->text($BASE_X, $y_3, "%s, %s" % (cProduct.product, cProduct.colour));
+    $pdf->SetFont($FONT,'', $PRODUCT_SIZE);
+    $pdf->Text($BASE_X, $y_3, sprintf("%s, %s", $cProduct->product, $cProduct->colour));
 
-    $pdf->set_font(FONT,'', $BARCODE_SIZE);
-    $pdf->text($BARCODE_X+0.85*$BARCODE_H, $BARCODE_Y+$BARCODE_H-0.4, cProduct.sku);
+    $pdf->SetFont($FONT,'', $BARCODE_SIZE);
+    $pdf->Text($BARCODE_X+0.85*$BARCODE_H, $BARCODE_Y+$BARCODE_H-0.4, $cProduct->sku);
 
-    $pdf->set_font(FONT,'', $SUBTXT_SIZE);
-    $pdf->text($BASE_X+$x_1, $y_4, "PARCEL DIMENSIONS");
-    txt="PARCEL NO.";
-    tw = $pdf->get_string_width(txt);
-    $pdf->text($BASE_X+$x_2-tw/2, $y_4, txt);
-    $pdf->text($BASE_X+$x_3, $y_4, "PO NO.");
-    $pdf->set_font(FONT, 'U', $REG_SIZE);
-    $pdf->text($BASE_X+$x_1, $y_5, "%s L x %s W x %s H cm" % (cProduct.length, cProduct.width, cProduct.height));
-    txt=cProduct.parcelNo;
-    tw = $pdf->get_string_width(txt);
-    $pdf->text($BASE_X+$x_2-tw/2, $y_5, txt);
-    $pdf->text($BASE_X+$x_3, $y_5, cProduct.poNo);
+    $pdf->SetFont($FONT,'', $SUBTXT_SIZE);
+    $pdf->Text($BASE_X+$x_1, $y_4, "PARCEL DIMENSIONS");
 
-    $pdf->set_font(FONT,'', $SUBTXT_SIZE);
-    $pdf->text($BASE_X+$x_1, $y_6, "G.W.");
-    txt="PCS/PARCEL";
-    tw = $pdf->get_string_width(txt);
-    $pdf->text($BASE_X+$x_2-tw/2, $y_6, txt);
-    $pdf->text($BASE_X+$x_3, $y_6, "DESTINATION");
-    $pdf->set_font(FONT, 'U', $REG_SIZE);
-    $pdf->text($BASE_X+$x_1, $y_7, "%s kg"%cProduct.weight);
-    txt=cProduct.parcelPcs;
-    tw = $pdf->get_string_width(txt);
-    $pdf->text($BASE_X+$x_2-tw/2, $y_7, txt);
-    txt = cProduct.destination;
-    $pdf->text($BASE_X+$x_3, $y_7, txt);
+    $txt="PARCEL NO.";
+    $tw = $pdf->GetStringWidth($txt);
+    $pdf->Text($BASE_X+$x_2-$tw/2, $y_4, $txt);
+    $pdf->Text($BASE_X+$x_3, $y_4, "PO NO.");
+    $pdf->SetFont($FONT, 'U', $REG_SIZE);
+    $pdf->Text($BASE_X+$x_1, $y_5, sprintf("%s L x %s W x %s H cm", $cProduct->length, $cProduct->width, $cProduct->height));
+    $txt=$cProduct->parcelNo;
+    $tw = $pdf->GetStringWidth($txt);
+    $pdf->Text($BASE_X+$x_2-tw/2, $y_5, $txt);
+    $pdf->Text($BASE_X+$x_3, $y_5, $cProduct->poNo);
 
-    tw = $pdf->get_string_width(txt);
+    $pdf->SetFont($FONT,'', $SUBTXT_SIZE);
+    $pdf->Text($BASE_X+$x_1, $y_6, "G.W.");
+    $txt="PCS/PARCEL";
+    $tw = $pdf->GetStringWidth($txt);
+    $pdf->Text($BASE_X+$x_2-$tw/2, $y_6, $txt);
+    $pdf->Text($BASE_X+$x_3, $y_6, "DESTINATION");
+    $pdf->SetFont($FONT, 'U', $REG_SIZE);
+    $pdf->Text($BASE_X+$x_1, $y_7, sprintf("%s kg", $cProduct->weight));
+    $txt= $cProduct->parcelPcs;
+    $tw = $pdf->GetStringWidth($txt);
+    $pdf->Text($BASE_X+$x_2-$tw/2, $y_7, $txt);
+    $txt = $cProduct->destination;
+    $pdf->Text($BASE_X+$x_3, $y_7, $txt);
 
-    $pdf->set_font(FONT,'', $SUBTXT_SIZE);
-    txt=cProduct.origin;
-    twx = $pdf->get_string_width(txt);
-    $pdf->text($BASE_X+$x_3+tw-twx, $y_7+0.65, txt);
-    print "[ %3d / %-3d  ] %3.2f%%" % (n, maxN, n/float(maxN)*100);
+    $tw = $pdf->GetStringWidth($txt);
+
+    $pdf->SetFont($FONT, '', $SUBTXT_SIZE);
+    $txt= $cProduct->origin;
+    $twx = $pdf->GetStringWidth($txt);
+    $pdf->Text($BASE_X+$x_3+$tw-$twx, $y_7+0.65, $txt);
+    printf("[ %3d / %-3d  ] %3.2f%%", $n, $maxN, $n/float($maxN)*100);
 }
-$pdf->output(OUTPUT_FILE, 'F');
-print "Complete.\n";
+
+$pdf->output($OUTPUT_FILE, 'F');
+print("Complete.\n");
+
+?>
