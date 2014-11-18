@@ -6,14 +6,11 @@
   //       - fPDF    https://http://f$pdf->org/
   //
 
-require('fpdf.php');
-
-import csv
-import sys
+require('fpdf-php/fpdf.php');
 
 # Default values - can be overridden using cmd switches
 $INPUT_FILE = "data.csv";
-$OUTPUT_FILE = "out.$pdf";
+$OUTPUT_FILE = "out.pdf";
 $FONT = 'Helvetica';
 
 $FONT_SRC = '';
@@ -21,6 +18,9 @@ $FONT_SRC_BOLD = '';
 
 # php genBarcodes.php -o output.$pdf -f Helvatica
 # php genBarcodes.php -i input.csv --font-src font_reg.ttf --font-bold-src font_bold.ttf
+#
+# TODO
+/*
 if(count(sys.argv) > 1){
     $args = sys.argv[1:]
     $argRange = range(count($args[:-1]));
@@ -31,7 +31,7 @@ if(count(sys.argv) > 1){
         else if($args[$x] == '--font-src') $FONT_SRC = $args[$x+1];
         else if($args[$x] == '--font-bold-src') $FONT_SRC_BOLD = $args[$x+1];
     }
-}
+}*/
 if($FONT_SRC != '' && $FONT_SRC_BOLD == '') $FONT_SRC_BOLD = $FONT_SRC;
 
 # Font sizes for the respective data segments
@@ -73,19 +73,19 @@ $x_3=18;
 # Just a simple wrapper for each product for superior code readability
 # Doesn't do any function other than extraction from the CSV array
 class Product{
-    public sku;
-    public collection;
-    public product;
-    public colour;
-    public length;
-    public width;
-    public height;
-    public weight;
-    public parcelNo;
-    public parcelPcs;
-    public poNo;
-    public destination;
-    public origin;
+    public $sku;
+    public $collection;
+    public $product;
+    public $colour;
+    public $length;
+    public $width;
+    public $height;
+    public $weight;
+    public $parcelNo;
+    public $parcelPcs;
+    public $poNo;
+    public $destination;
+    public $origin;
     function Product($data){
         $this->sku = $data[0];
         $this->collection = $data[1];
@@ -108,20 +108,13 @@ class Product{
 $columns = False;
 $rows = array();
 
-$sourceFile = open($INPUT_FILE, 'rU') as f;
-$reader = csv.reader($sourceFile);
-foreach($reader as $row){
-    if($columns == False){ 
-        $columns = $row;
-        continue;
-    }
-    $rows.append(new Product($row));
-}
-
-$csv = array_map('str_getcsv', file('data.csv'));
+$input = file_get_contents($INPUT_FILE);
+$rows = str_getcsv($input, "\r"); //parse the rows 
+foreach($rows as &$row) $row = new Product(str_getcsv($row, ",")); //parse the items in rows 
+array_shift($rows);
 
 # Begin the PDF production, Letter page
-$pdf = FPDF('L', 'cm', 'Letter');
+$pdf = new FPDF('L', 'cm', 'A4');
 $pdf->SetMargins($PADDING_X, $PADDING_Y);
 
 # Set the fonts that we would like to use, and override the Bold
@@ -144,7 +137,7 @@ foreach($rows as $cProduct){
     $pdf->SetFont($FONT,'', $COLLECTION_SIZE);
     $pdf->SetFillColor(255);
     $pdf->SetXY($BARCODE_X, $BARCODE_Y+$BARCODE_H-1*$BARCODE_H/3.0);
-    $pdf->Cell(0, 2, fill=1);
+    $pdf->Cell(0, 2, '', 0, 0, 'L', 1);
 
     $pdf->SetFont($FONT,'B', $COLLECTION_SIZE);
     $pdf->Text($BASE_X, $y_1, strtoupper($cProduct->collection));
@@ -169,7 +162,7 @@ foreach($rows as $cProduct){
     $pdf->Text($BASE_X+$x_1, $y_5, sprintf("%s L x %s W x %s H cm", $cProduct->length, $cProduct->width, $cProduct->height));
     $txt=$cProduct->parcelNo;
     $tw = $pdf->GetStringWidth($txt);
-    $pdf->Text($BASE_X+$x_2-tw/2, $y_5, $txt);
+    $pdf->Text($BASE_X+$x_2-$tw/2, $y_5, $txt);
     $pdf->Text($BASE_X+$x_3, $y_5, $cProduct->poNo);
 
     $pdf->SetFont($FONT,'', $SUBTXT_SIZE);
@@ -192,7 +185,7 @@ foreach($rows as $cProduct){
     $txt= $cProduct->origin;
     $twx = $pdf->GetStringWidth($txt);
     $pdf->Text($BASE_X+$x_3+$tw-$twx, $y_7+0.65, $txt);
-    printf("[ %3d / %-3d  ] %3.2f%%", $n, $maxN, $n/float($maxN)*100);
+    printf("[ %3d / %-3d  ] %3.2f%%", $n, $maxN, $n/(float)$maxN*100);
 }
 
 $pdf->output($OUTPUT_FILE, 'F');
