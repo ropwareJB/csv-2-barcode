@@ -16,22 +16,12 @@ $FONT = 'Helvetica';
 $FONT_SRC = '';
 $FONT_SRC_BOLD = '';
 
-# php genBarcodes.php -o output.$pdf -f Helvatica
+# php genBarcodes.php -o output.pdf
 # php genBarcodes.php -i input.csv --font-src font_reg.ttf --font-bold-src font_bold.ttf
-#
-# TODO
-/*
-if(count(sys.argv) > 1){
-    $args = sys.argv[1:]
-    $argRange = range(count($args[:-1]));
-    foreach($argRange as $x){
-        if($args[x] == '-o') $OUTPUT_FILE = $args[$x+1];
-        else if($args[$x] == '-i') $INPUT_FILE = $args[$x+1];
-        else if($args[$x] == '-f') $FONT = $args[$x+1];
-        else if($args[$x] == '--font-src') $FONT_SRC = $args[$x+1];
-        else if($args[$x] == '--font-bold-src') $FONT_SRC_BOLD = $args[$x+1];
-    }
-}*/
+if(isset($_GET['font'])) $FONT_SRC = $_GET['font'];
+if(isset($_GET['font-bold'])) $FONT_SRC_BOLD = $_GET['font-bold'];
+if(isset($_GET['input-file'])) $INPUT_FILE = $_GET['input-file'];
+if(isset($_GET['output-file'])) $OUTPUT_FILE = $_GET['output-file'];
 if($FONT_SRC != '' && $FONT_SRC_BOLD == '') $FONT_SRC_BOLD = $FONT_SRC;
 
 # Font sizes for the respective data segments
