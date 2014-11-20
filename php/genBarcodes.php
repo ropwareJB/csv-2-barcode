@@ -119,6 +119,15 @@ if($FONT_SRC != '' && $FONT_SRC_BOLD != ''){
 # then write the Collection, SKU and other product details
 $n=0;
 $maxN = count($rows);
+
+function sendProgress($x){
+      session_start();
+          $_SESSION["progress"]=$x;
+          session_write_close();
+}
+
+sendProgress(0);
+
 foreach($rows as $cProduct){
     $n++;
     $pdf->AddPage();
@@ -175,7 +184,10 @@ foreach($rows as $cProduct){
     $txt= $cProduct->origin;
     $twx = $pdf->GetStringWidth($txt);
     $pdf->Text($BASE_X+$x_3+$tw-$twx, $y_7+0.65, $txt);
-    printf("[ %3d / %-3d  ] %3.2f%%", $n, $maxN, $n/(float)$maxN*100);
+    $progress = $n/(float)$maxN*100;
+    printf("[ %3d / %-3d  ] %3.2f%%", $n, $maxN, $progress);
+    sendProgress($progress);
+
 }
 
 $pdf->output($OUTPUT_FILE, 'F');
