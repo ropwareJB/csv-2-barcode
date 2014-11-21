@@ -1,0 +1,120 @@
+/* Styling based on work by Kushagra Agarwal
+   http://cssdeck.com/labs/styling-html5-progress-bars */
+
+body {
+  background: #322c35;
+}
+
+#feedback{
+  width:500px;
+  display:block;
+  margin: 50px auto;
+  position: relative;
+}
+#progressReport{
+  position: absolute;
+  top: 10px;
+}
+#progress{
+  display:none;
+}
+#percent{
+  position: absolute;
+  top: 15px;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  color: white;
+}
+progress {
+  width: 100%;
+  height: 14px;
+  display: block;
+  /* Important Thing */
+  -webkit-appearance: none;
+  border: none;
+}
+
+progress::-webkit-progress-bar {
+  background: black;
+  border-radius: 50px;
+  padding: 2px;
+  box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 0.2);
+}
+
+progress::-webkit-progress-value {
+  border-radius: 50px;
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
+  background:
+    -webkit-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, 0.1) 33%, rgba(0, 0, 0, 0.1) 66%, transparent 66%),
+    -webkit-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.2)),
+    -webkit-linear-gradient(left, #2277FF, #44AAFF);
+  
+  background-size: 25px 14px, 100% 100%, 100% 100%;
+  -webkit-animation: move 5s linear 0 infinite;
+
+  -webkit-transition-property: width;
+  -webkit-transition-duration: 0.6s;
+  -webkit-transition-timing-function: ease-out;
+  -webkit-transition-delay: 0s;
+}
+progress::-moz-progress-bar {
+  transition-property: width;
+  transition-duration: 0.6s;
+  transition-timing-function: ease-out;
+  transition-delay: 0s;
+}
+@-webkit-keyframes move {
+  0% {background-position: 0px 0px, 0 0, 0 0}
+  100% {background-position: -100px 0px, 0 0, 0 0}
+}
+
+/* Button Styling */
+.genButton {
+  width:100%;
+  -moz-box-shadow:inset 0px 1px 0px 0px #f5978e;
+  -webkit-box-shadow:inset 0px 1px 0px 0px #f5978e;
+  box-shadow:inset 0px 1px 0px 0px #f5978e;
+  background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #f24537), color-stop(1, #c62d1f));
+  background:-moz-linear-gradient(top, #f24537 5%, #c62d1f 100%);
+  background:-webkit-linear-gradient(top, #f24537 5%, #c62d1f 100%);
+  background:-o-linear-gradient(top, #f24537 5%, #c62d1f 100%);
+  background:-ms-linear-gradient(top, #f24537 5%, #c62d1f 100%);
+  background:linear-gradient(to bottom, #f24537 5%, #c62d1f 100%);
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f24537', endColorstr='#c62d1f',GradientType=0);
+  background-color:#f24537;
+  -moz-border-radius:6px;
+  -webkit-border-radius:6px;
+  border-radius:6px;
+  border:1px solid #d02718;
+  display:inline-block;
+  cursor:pointer;
+  color:#ffffff;
+  font-family:arial;
+  font-size:15px;
+  font-weight:bold;
+  padding:6px 24px;
+  text-decoration:none;
+  text-shadow:0px 1px 0px #810e05;
+}
+.genButton:hover {
+  background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #c62d1f), color-stop(1, #f24537));
+  background:-moz-linear-gradient(top, #c62d1f 5%, #f24537 100%);
+  background:-webkit-linear-gradient(top, #c62d1f 5%, #f24537 100%);
+  background:-o-linear-gradient(top, #c62d1f 5%, #f24537 100%);
+  background:-ms-linear-gradient(top, #c62d1f 5%, #f24537 100%);
+  background:linear-gradient(to bottom, #c62d1f 5%, #f24537 100%);
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#c62d1f', endColorstr='#f24537',GradientType=0);
+  background-color:#c62d1f;
+}
+.genButton:active {
+  position:relative;
+  top:1px;
+}
+
+
+
+
+
+
+
