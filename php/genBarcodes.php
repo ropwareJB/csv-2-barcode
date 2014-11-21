@@ -4,9 +4,11 @@
   //
   // Dependencies:
   //       - fPDF    https://http://f$pdf->org/
+  //       - fPDF import Memory images;
+  //                 http://fpdf.de/downloads/addons/45/
   //
 
-require('fpdf-php/fpdf.php');
+require('fpdf-php/mem_image.php');
 
 # Default values - can be overridden using cmd switches
 $INPUT_FILE = "data.csv";
@@ -22,6 +24,8 @@ if(isset($_GET['font'])) $FONT_SRC = $_GET['font'];
 if(isset($_GET['font-bold'])) $FONT_SRC_BOLD = $_GET['font-bold'];
 if(isset($_GET['input-file'])) $INPUT_FILE = $_GET['input-file'];
 if(isset($_GET['output-file'])) $OUTPUT_FILE = $_GET['output-file'];
+if($FONT_SRC != '' && $FONT_SRC_BOLD == '') $FONT_SRC_BOLD = $FONT_SRC;
+
 if($FONT_SRC != '' && $FONT_SRC_BOLD == '') $FONT_SRC_BOLD = $FONT_SRC;
 
 # Font sizes for the respective data segments
@@ -104,7 +108,7 @@ foreach($rows as &$row) $row = new Product(str_getcsv($row, ",")); //parse the i
 array_shift($rows);
 
 # Begin the PDF production, Letter page
-$pdf = new FPDF('L', 'cm', 'A4');
+$pdf = new PDF_MemImage('L', 'cm', 'A4');
 $pdf->SetMargins($PADDING_X, $PADDING_Y);
 
 # Set the fonts that we would like to use, and override the Bold
@@ -121,18 +125,25 @@ $n=0;
 $maxN = count($rows);
 
 function sendProgress($x){
-      session_start();
-          $_SESSION["progress"]=$x;
-          session_write_close();
+    session_start();
+    $_SESSION["progress"]=$x;
+    session_write_close();
 }
 
 sendProgress(0);
+
+ini_set("allow_url_fopen", true);
 
 foreach($rows as $cProduct){
     $n++;
     $pdf->AddPage();
     $imgURL = "http://barcode.tec-it.com/barcode.ashx?code=Code128&modulewidth=fit&data=".$cProduct->sku."&dpi=96&imagetype=png&rotation=0&color=&bgcolor=&fontcolor=&quiet=0&qunit=mm";
-    $pdf->Image($imgURL, $BARCODE_X, $BARCODE_Y, 0, $BARCODE_H, 'png');
+    $cimg = curl_init($imgURL);
+    curl_setopt($cimg, CURLOPT_RETURNTRANSFER, 1); 
+    $img = curl_exec($cimg);
+    $pdf->MemImage($img, $BARCODE_X, $BARCODE_Y, 0, $BARCODE_H);
+    curl_close($cimg);
+
     $pdf->SetFont($FONT,'', $COLLECTION_SIZE);
     $pdf->SetFillColor(255);
     $pdf->SetXY($BARCODE_X, $BARCODE_Y+$BARCODE_H-1*$BARCODE_H/3.0);
@@ -187,7 +198,6 @@ foreach($rows as $cProduct){
     $progress = $n/(float)$maxN*100;
     printf("[ %3d / %-3d  ] %3.2f%%", $n, $maxN, $progress);
     sendProgress($progress);
-
 }
 
 $pdf->output($OUTPUT_FILE, 'F');
