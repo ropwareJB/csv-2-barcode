@@ -5,8 +5,13 @@
 </head>
 <body>
 
-<button id="generateBtn">Generate</button>
-<progress id="progress" max="100" value="0"></progress>
+<div id="feedback">
+  <button id="generateBtn" class="genButton">GENERATE</button>
+  <div id="progressReporter">
+    <progress id="progress" max="100" value="0"></progress>
+    <div id="percent"></div>
+  </div>
+</div>
 <script type="text/javascript" src="/genBarcode.js"></script>
 </body>
 </html>
