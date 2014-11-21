@@ -9,6 +9,8 @@
   //
 
 require('fpdf-php/mem_image.php');
+define('FPDF_FONTPATH','./font');
+
 
 # Default values - can be overridden using cmd switches
 $INPUT_FILE = "data.csv";
@@ -21,11 +23,11 @@ $FONT_SRC_BOLD = '';
 # php genBarcodes.php -o output.pdf
 # php genBarcodes.php -i input.csv --font-src font_reg.ttf --font-bold-src font_bold.ttf
 if(isset($_GET['font'])) $FONT_SRC = $_GET['font'];
+else echo "font not spec";
 if(isset($_GET['font-bold'])) $FONT_SRC_BOLD = $_GET['font-bold'];
+else echo "bold not specified";
 if(isset($_GET['input-file'])) $INPUT_FILE = $_GET['input-file'];
 if(isset($_GET['output-file'])) $OUTPUT_FILE = $_GET['output-file'];
-if($FONT_SRC != '' && $FONT_SRC_BOLD == '') $FONT_SRC_BOLD = $FONT_SRC;
-
 if($FONT_SRC != '' && $FONT_SRC_BOLD == '') $FONT_SRC_BOLD = $FONT_SRC;
 
 # Font sizes for the respective data segments
@@ -114,6 +116,7 @@ $pdf->SetMargins($PADDING_X, $PADDING_Y);
 # Set the fonts that we would like to use, and override the Bold
 # option for the font.
 if($FONT_SRC != '' && $FONT_SRC_BOLD != ''){
+    echo "loading fonts";
     $pdf->AddFont($FONT, '', $FONT_SRC);
     $pdf->AddFont($FONT, 'B', $FONT_SRC_BOLD);
 }
