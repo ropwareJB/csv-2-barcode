@@ -4,13 +4,20 @@
 <script type="text/javascript" src="/jquery.min.js"></script>
 </head>
 <body>
+<h2>Batch Barcode Generator</h2>
 
 <div id="feedback">
-  <button id="generateBtn" class="genButton">GENERATE</button>
   <div id="progressReporter">
-    <progress id="progress" max="100" value="0"></progress>
-    <div id="percent"></div>
+    <form id="uploadForm" action="upload.php" method="post" enctype="multipart/form-data">
+        <input type="file" name="fileToUpload" id="fileToUpload">CSV file</input>
+        <button id="generateBtn" class="genButton" disabled>Generate</button>
+    </form>
+    <div class="progressGroup">
+      <progress id="progress" max="100" value="0"></progress>
+      <div id="percent"></div>
+    </div>
   </div>
+  <button class="downloadBtn">Download</button>
 </div>
 <script type="text/javascript" src="/genBarcode.js"></script>
 </body>

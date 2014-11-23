@@ -11,9 +11,35 @@
 require('fpdf-php/mem_image.php');
 define('FPDF_FONTPATH','./font');
 
+$target_dir = "uploads/";
+$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+$uploadOk = 1;
+$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+
+// Check if file already exists
+if (file_exists($target_file)) {
+    echo "Sorry, file already exists.";
+    $uploadOk = 0;
+}
+// Check file size
+if ($_FILES["fileToUpload"]["size"] > 500000) {
+    echo "Sorry, your file is too large.";
+    $uploadOk = 0;
+}
+// Allow certain file formats
+if($imageFileType != "csv") {
+    echo "Sorry, only CSV files are allowed.";
+    $uploadOk = 0;
+}
+// Check if $uploadOk is set to 0 by an error
+if ($uploadOk == 0) {
+    echo "Sorry, your file was not uploaded.";
+    exit;
+}
+// if everything is ok, process the CSV
 
 # Default values - can be overridden using cmd switches
-$INPUT_FILE = "data.csv";
+$INPUT_FILE = $_FILES["fileToUpload"]["tmp_name"];
 $OUTPUT_FILE = "out.pdf";
 $FONT = 'Helvetica';
 
@@ -116,7 +142,6 @@ $pdf->SetMargins($PADDING_X, $PADDING_Y);
 # Set the fonts that we would like to use, and override the Bold
 # option for the font.
 if($FONT_SRC != '' && $FONT_SRC_BOLD != ''){
-    echo "loading fonts";
     $pdf->AddFont($FONT, '', $FONT_SRC);
     $pdf->AddFont($FONT, 'B', $FONT_SRC_BOLD);
 }
@@ -137,16 +162,21 @@ sendProgress(0);
 
 ini_set("allow_url_fopen", true);
 
+$barcodeDic = array();
+
 foreach($rows as $cProduct){
     $n++;
     $pdf->AddPage();
-    $imgURL = "http://barcode.tec-it.com/barcode.ashx?code=Code128&modulewidth=fit&data=".$cProduct->sku."&dpi=96&imagetype=png&rotation=0&color=&bgcolor=&fontcolor=&quiet=0&qunit=mm";
-    $cimg = curl_init($imgURL);
-    curl_setopt($cimg, CURLOPT_RETURNTRANSFER, 1); 
-    $img = curl_exec($cimg);
-    $pdf->MemImage($img, $BARCODE_X, $BARCODE_Y, 0, $BARCODE_H);
-    curl_close($cimg);
+    if(!array_key_exists($cProduct->sku, $barcodeDic)){
+        $imgURL = "http://barcode.tec-it.com/barcode.ashx?code=EANUCC128&modulewidth=fit&data=".$cProduct->sku."&dpi=96&imagetype=png&rotation=0&color=&bgcolor=&fontcolor=&quiet=0&qunit=mm";
+        $cimg = curl_init($imgURL);
+        curl_setopt($cimg, CURLOPT_RETURNTRANSFER, 1); 
+        $img = curl_exec($cimg);
+        $barcodeDic[$cProduct->sku] = $img;
+        curl_close($cimg);
+    }else $img = $barcodeDic[$cProduct->sku];
 
+    $pdf->MemImage($img, $BARCODE_X, $BARCODE_Y, 0, $BARCODE_H);
     $pdf->SetFont($FONT,'', $COLLECTION_SIZE);
     $pdf->SetFillColor(255);
     $pdf->SetXY($BARCODE_X, $BARCODE_Y+$BARCODE_H-1*$BARCODE_H/3.0);
